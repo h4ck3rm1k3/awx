@@ -9,14 +9,16 @@ import sys
 import subprocess
 from setuptools import setup
 from distutils.command.sdist import sdist
+from distutils.util import convert_path
 
+my_home = convert_path(os.path.expanduser("~")) + "/.local/awx/"
 
 # Paths we'll use later
-etcpath = "/etc/tower"
-homedir = "/var/lib/awx"
-bindir = "/usr/bin"
-sharedir = "/usr/share/awx"
-docdir = "/usr/share/doc/awx"
+etcpath = my_home + u"/etc/tower"
+homedir = my_home + u"/var/lib/awx"
+bindir  = my_home + u"/usr/bin"
+sharedir = my_home + u"/usr/share/awx"
+docdir = my_home + u"/usr/share/doc/awx"
 
 
 def get_version():
@@ -27,23 +29,23 @@ def get_version():
             version = file.read().strip()
     else:
         version = subprocess.Popen("git describe --long | cut -d - -f 1-1", shell=True, stdout=subprocess.PIPE).stdout.read().strip()
-    return version
+    return str(version)
 
 
 if os.path.exists("/etc/debian_version"):
-    sysinit = "/etc/init.d"
-    webconfig  = "/etc/nginx"
-    siteconfig = "/etc/nginx/sites-enabled"
+    sysinit = my_home +"/etc/init.d"
+    webconfig  = my_home +"/etc/nginx"
+    siteconfig = my_home +"/etc/nginx/sites-enabled"
     # sosreport-3.1 (and newer) look in '/usr/share/sosreport/sos/plugins'
     # sosreport-3.0 looks in '/usr/lib/python2.7/dist-packages/sos/plugins'
     # debian/<package>.links will create symlinks to support both versions
-    sosconfig = "/usr/share/sosreport/sos/plugins"
+    sosconfig = my_home +"/usr/share/sosreport/sos/plugins"
 else:
-    sysinit = "/etc/rc.d/init.d"
-    webconfig  = "/etc/nginx"
-    siteconfig = "/etc/nginx/sites-enabled"
+    sysinit = my_home +"/etc/rc.d/init.d"
+    webconfig  = my_home +"/etc/nginx"
+    siteconfig = my_home +"/etc/nginx/sites-enabled"
     # The .spec will create symlinks to support multiple versions of sosreport
-    sosconfig = "/usr/share/sosreport/sos/plugins"
+    sosconfig = my_home +"/usr/share/sosreport/sos/plugins"
 
 #####################################################################
 # Isolated packaging
@@ -154,17 +156,17 @@ setup(
         ],
     },
     data_files = proc_data_files([
-        ("%s" % homedir,        ["config/wsgi.py",
-                                 "awx/static/favicon.ico"]),
-        ("%s" % siteconfig,      ["config/awx-nginx.conf"]),
+        ("%s" % homedir,        [u"config/wsgi.py",
+                                 u"awx/static/favicon.ico"]),
+        ("%s" % siteconfig,      [u"config/awx-nginx.conf"]),
         #        ("%s" % webconfig,      ["config/uwsgi_params"]),
-        ("%s" % sharedir,       ["tools/scripts/request_tower_configuration.sh","tools/scripts/request_tower_configuration.ps1"]),
-        ("%s" % docdir,         ["docs/licenses/*",]),
-        ("%s" % bindir, ["tools/scripts/ansible-tower-service",
-                         "tools/scripts/failure-event-handler",
-                         "tools/scripts/awx-python",
-                         "tools/scripts/ansible-tower-setup"]),
-        ("%s" % sosconfig, ["tools/sosreport/tower.py"])]),
+        ("%s" % sharedir,       [u"tools/scripts/request_tower_configuration.sh",u"tools/scripts/request_tower_configuration.ps1"]),
+        ("%s" % docdir,         [u"docs/licenses/*",]),
+        ("%s" % bindir, [u"tools/scripts/ansible-tower-service",
+                         u"tools/scripts/failure-event-handler",
+                         u"tools/scripts/awx-python",
+                         u"tools/scripts/ansible-tower-setup"]),
+        ("%s" % sosconfig, [u"tools/sosreport/tower.py"])]),
     cmdclass = {'sdist_isolated': sdist_isolated},
     options = {
         'aliases': {
@@ -172,8 +174,8 @@ setup(
             'release_build': 'clean --all egg_info -b "" sdist',
             'isolated_build': 'clean --all egg_info -b "" sdist_isolated',
         },
-        'build_scripts': {
-            'executable': '/usr/bin/awx-python',
-        },
+        #'build_scripts': {
+            #'executable': '/usr/bin/awx-python',
+        #},
     },
 )
